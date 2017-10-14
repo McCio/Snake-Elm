@@ -7,8 +7,9 @@ import List.Extra as ListE exposing (init)
 import Matrix exposing (Location)
 import Model exposing (..)
 import Random exposing (Generator, int, pair)
-import Snake exposing (Snake)
+import Snake exposing (Snake, normalize)
 import Status exposing (..)
+import Time
 
 
 handleKeyBoardMsg : KE.Msg -> Model -> ( Model, Cmd Msg )
@@ -57,11 +58,17 @@ moveSnake direction model =
                         ( -1, -1 )
                     else
                         model.foodLocation
+
+                score =
+                    List.length >> normalize <| xs
+
+                newSpeed =
+                    Time.second * 1 / logBase 2 (toFloat <| 5 * (score // 100) + 2)
             in
             if xs == model.snake then
                 ( model, newMessage )
             else
-                ( { model | board = addSnakeAndFood xs newFood model.board, snake = xs, lastMove = lastMove }, newMessage )
+                ( { model | board = addSnakeAndFood xs newFood model.board, snake = xs, lastMove = lastMove, speed = newSpeed }, newMessage )
 
         Nothing ->
             ( { model | status = Lost }, Cmd.none )
